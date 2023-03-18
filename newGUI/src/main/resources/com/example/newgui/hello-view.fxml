@@ -278,7 +278,7 @@
                   </Button>
                </children>
             </HBox>
-            <ListView fx:id="listView" layoutX="77.0" layoutY="93.0" prefHeight="476.0" prefWidth="655.0" />
+            <ListView fx:id="listView" layoutX="24.0" layoutY="93.0" prefHeight="500.0" prefWidth="766.0" />
          </children>
       </Pane>
    </center>
