@@ -2,6 +2,7 @@ package com.example.student;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,17 +38,7 @@ public class StudentRegister {
         return register.isEmpty();
     }
 
-//    public static void saveFile() {
-//        //ADD the save method after a student has been added so when next
-//        //query is loaded the new student will be part of it
-//        try {
-//            StudentRegisterFileHandler.save(register);
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//
-//    }
+
     public void saveFile(Path filePath) throws IOException {
         StudentRegisterFileHandler handler = new StudentRegisterFileHandler();
         handler.save(register, filePath);
@@ -93,63 +84,57 @@ public class StudentRegister {
 
     }
 
-
-
-
-
-public List<String> getAllStudents() {
-    return register.values().stream().map(Student::toString1).collect(Collectors.toList());
-}
-
-
-
-    public void getStudentsByName(String name) {
-        register.values().stream()
-                .filter(student -> student.getName().equalsIgnoreCase(name))
-                .forEach(System.out::println);
+    public List<String> getAllStudents() {
+        return register.values().stream().map(Student::toString1).collect(Collectors.toList());
     }
 
-
-    public void getStudentsByNameStartingWith(String letter) {
-        register.values().stream()
-                .filter(student -> student.getName().startsWith(letter))
-                .forEach(System.out::println);
-    }
-    public Predicate<Student> getNamePredicate(String nameText) {
-        return s -> nameText.isEmpty() || s.getName().toLowerCase().startsWith(nameText);
+    public List<Student> getStudentsByPredicate(Predicate<Student> predicate) {
+        return register.values().stream()
+                .filter(predicate)
+                .collect(Collectors.toList());
     }
 
-
-    public void getStudentById(int id) {
-        register.values().stream()
-                .filter(student -> student.getId() == id)
-                .findFirst()
-                .ifPresent(System.out::println);
-    }
     public Predicate<Student> getIdPredicate(String idText) {
         return s -> idText.isEmpty() || Integer.toString(s.getId()).equals(idText);
     }
 
-
-    public void getStudentByCourse(String course) {
-        register.values().stream()
-                .filter(student -> student.getCourse().equalsIgnoreCase(course))
-                .forEach(System.out::println);
+    public Predicate<Student> getNamePredicate(String nameText) {
+        return s -> nameText.isEmpty() || s.getName().toLowerCase().startsWith(nameText);
     }
+
     public Predicate<Student> getCoursePredicate(String courseText) {
         return s -> courseText.isEmpty() || s.getCourse().toLowerCase().startsWith(courseText);
     }
-
-    public void getStudentByModule(String module) {
-        register.values().stream()
-                .filter(student -> student.getModule().equalsIgnoreCase(module))
-                .forEach(System.out::println);
+    public Predicate<Student> getCbCoursePredicate(String courseText) {
+        return s -> courseText.isEmpty() || s.getCourse().toLowerCase().equals(courseText);
     }
+
     public Predicate<Student> getModulePredicate(String moduleText) {
         return s -> moduleText.isEmpty() || s.getModule().toLowerCase().startsWith(moduleText);
     }
+    public Predicate<Student> getCbModulePredicate(String moduleText) {
+        return s -> moduleText.isEmpty() || s.getModule().toLowerCase().equals(moduleText);
+    }
+
     public Predicate<Student> getMarksPredicate(String marksText) {
         return s -> marksText.isEmpty() || Integer.toString(s.getMarks()).equals(marksText);
+    }
+
+    public Predicate<Student> getCombinedPredicate(String idText, String nameText, String courseText, String moduleText, String marksText) {
+        List<Predicate<Student>> predicates = new ArrayList<>();
+        predicates.add(getIdPredicate(idText));
+        predicates.add(getNamePredicate(nameText));
+        predicates.add(getCoursePredicate(courseText));
+        predicates.add(getModulePredicate(moduleText));
+        predicates.add(getMarksPredicate(marksText));
+        return predicates.stream().reduce(Predicate::and).orElse(student -> true);
+    }
+
+    public Predicate<Student> getCourseModulePredicate(String courseText, String moduleText) {
+        List<Predicate<Student>> predicates = new ArrayList<>();
+        predicates.add(getCoursePredicate(courseText));
+        predicates.add(getModulePredicate(moduleText));
+        return predicates.stream().reduce(Predicate::and).orElse(student -> true);
     }
 
     public void getStudentsByModuleAndSortByMarksDescending(String module) {
@@ -158,6 +143,7 @@ public List<String> getAllStudents() {
                 .sorted((student1, student2) -> student2.getMarks() - student1.getMarks())
                 .forEach(System.out::println);
     }
+
 
     public void getModuleAverageMark(String module) {
         double averageMark = register.values().stream()
@@ -168,19 +154,5 @@ public List<String> getAllStudents() {
 
         //System.out.println("The average mark for " + module + " is: " + averageMark);
         System.out.printf("The average mark for %s is: %.2f%%\n", module, averageMark);
-    }
-
-
-
-
-
-
-
-
-
-    public static void main(String[] args) {
-
-
-
     }
 }

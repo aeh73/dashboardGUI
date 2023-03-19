@@ -1,33 +1,26 @@
 package com.example.newgui;
 
 import com.example.student.Student;
-import com.example.student.StudentRegister;
 import com.example.student.StudentRegisterFileHandler;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.net.SocketOption;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -35,14 +28,18 @@ import static com.example.student.StudentRegister.studentRegister;
 
 
 public class HelloController implements Initializable {
-    ObservableList courseList = FXCollections.observableArrayList(
-            "Mathematics","Physics","Engineering","Computer Science");
-    ObservableList modulesList = FXCollections.observableArrayList(
-            "Programming 1","Programming 2","Data Structures","Calculus 1","Linear Algebra","Probability","Statistics","Electromagnetism","Thermodynamics","Methods in Mechanics");
+//    ObservableList courseList = FXCollections.observableArrayList(
+//            "Mathematics","Physics","Engineering","Computer Science");
+//    ObservableList modulesList = FXCollections.observableArrayList(
+//            "Programming 1","Programming 2","Data Structures","Calculus 1","Linear Algebra","Probability","Statistics","Electromagnetism","Thermodynamics","Methods in Mechanics");
     @FXML
     private ChoiceBox<String> courses, modules;
+    // Map to store the secondary choicebox options to the first choicebox input
+    private Map<String, List<String>> optionsMap = new HashMap<>();
     @FXML
     private ListView<String> listView;
+    @FXML
+    private TableView<String> tblView;
     @FXML
     private TextField idField, nameField, courseField, moduleField, marksField;
     @FXML
@@ -50,24 +47,60 @@ public class HelloController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle){
-        loadCourse();
-        loadModule();
+//        loadCourse();
+//        loadModule();
+        loadCourseModule();
     }
-
+    /*Clears TextField inputs*/
     public void clearInputs(){
+        // add any other TextField instances to clear here
         idField.clear();
         nameField.clear();
         courseField.clear();
         moduleField.clear();
         marksField.clear();
     }
-    private void loadCourse(){
-
-        courses.getItems().addAll(courseList);
+    private void clearChoiceBox() {
+        // add any other ChoiceBox instances to clear here
+        modules.getSelectionModel().clearSelection();
+        courses.getSelectionModel().clearSelection();
     }
-    private void loadModule(){
+    public void handleClearDisplay() {
+        listView.getItems().clear();
+        clearInputs();
+        clearChoiceBox();
+    }
 
-        modules.getItems().addAll(modulesList);
+    private void loadCourseModule(){
+        // Set up the options for the first choice box
+        List<String> courseOptions = Arrays.asList("Mathematics","Physics","Engineering","Computer Science");
+        courses.getItems().addAll(courseOptions);
+
+        // Set up the options for the second choice box
+        List<String> moduleOptions1 = Arrays.asList("Calculus 1", "Linear Algebra", "Probability", "Statistics");
+        List<String> moduleOptions2 = Arrays.asList("Mechanics", "Electromagnetism", "Thermodynamics");
+        List<String> moduleOptions3 = Arrays.asList("Methods in Mechanics");
+        List<String> moduleOptions4 = Arrays.asList("Programming 1", "Programming 2", "Data Structures", "Data Mining");
+        optionsMap.put("Mathematics", moduleOptions1);
+        optionsMap.put("Physics", moduleOptions2);
+        optionsMap.put("Engineering", moduleOptions3);
+        optionsMap.put("Computer Science", moduleOptions4);
+
+        // Set up the event handler for the first choice box to determine the second
+        courses.setOnAction(event -> {
+            String selectedCourse = courses.getSelectionModel().getSelectedItem();
+            List<String> secondOptions = optionsMap.get(selectedCourse);
+            modules.getItems().clear(); // Clear existing options
+
+            if (secondOptions != null) {
+                modules.getItems().addAll(secondOptions); // Add new options
+            }
+
+            Predicate<Student> coursePredicate = studentRegister.getCbCoursePredicate(selectedCourse);
+            List<Student> filteredStudents = studentRegister.getStudentsByPredicate(coursePredicate);
+            listView.getItems().clear(); // Clear existing items
+            listView.getItems().addAll(filteredStudents.toString());
+        });
     }
 
     @FXML
@@ -131,10 +164,6 @@ public class HelloController implements Initializable {
             listView.getItems().clear();
             listView.getItems().addAll(studentRegister.getAllStudents());
         }
-    }
-
-    public void handleClearDisplay() {
-        listView.getItems().clear();
     }
 
     @FXML
@@ -226,43 +255,100 @@ public class HelloController implements Initializable {
         String moduleText = moduleField.getText().toLowerCase();
         String marksText = marksField.getText();
 
-        Optional.of(idText).filter(id -> !id.isBlank())
-                .or(() -> Optional.of(nameText).filter(name -> !name.isBlank()))
-                .or(() -> Optional.of(courseText).filter(course -> !course.isBlank()))
-                .or(() -> Optional.of(moduleText).filter(module -> !module.isBlank()))
-                .or(() -> Optional.of(marksText).filter(marks -> !marks.isBlank()))
-                .ifPresentOrElse(criteria -> {
-                    // at least one criteria provided
-                    Predicate<Student> idPredicate = studentRegister.getIdPredicate(idText);
-                    Predicate<Student> namePredicate = studentRegister.getNamePredicate(nameText);
-                    Predicate<Student> coursePredicate = studentRegister.getCoursePredicate(courseText);
-                    Predicate<Student> modulePredicate = studentRegister.getModulePredicate(moduleText);
-                    Predicate<Student> marksPredicate = studentRegister.getMarksPredicate(marksText);
+        // create the combined predicate from TextField inputs
+        Predicate<Student> combinedPredicate = studentRegister.getCombinedPredicate(
+                idText,
+                nameText,
+                courseText,
+                moduleText,
+                marksText
+        );
 
-                    List<Student> matchingStudents = studentRegister.getRegister().values().stream()
-                            .filter(idPredicate.and(namePredicate).and(coursePredicate).and(modulePredicate).and(marksPredicate))
-                            .collect(Collectors.toList());
+        try {
+            List<Student> matchingStudents = studentRegister.getStudentsByPredicate(combinedPredicate);
+            if (matchingStudents.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("No matching students found.");
+                alert.setHeaderText(null);
+                alert.setContentText("No matching students were found for the provided search criteria.");
+                alert.showAndWait();
+            } else {
+                listView.getItems().clear();
+                matchingStudents.forEach(student -> listView.getItems().add(student.toString1()));
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Students found.");
+                alert.setHeaderText(null);
+                alert.setContentText("These are the matching students.");
+                alert.showAndWait();
+            }
+        } catch (IllegalArgumentException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Search Criteria Required");
+            alert.setHeaderText(null);
+            alert.setContentText("Please provide at least one search criteria.");
+            alert.showAndWait();
+        }
 
-                    if (matchingStudents.isEmpty()) {
-                        // no matching students found
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("No matching students found.");
-                        alert.setHeaderText(null);
-                        alert.setContentText("No matching students were found for the provided search criteria..");
-                        alert.showAndWait();
-                    } else {
-                        // display matching students
-                        listView.getItems().clear();
-                        matchingStudents.forEach(student -> listView.getItems().add(student.toString1()));
-                    }
-                }, () -> {
-                    // no criteria provided
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Search Criteria Required");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Please provide at least one search criteria..");
-                    alert.showAndWait();
-                });
     }
-
+//    @FXML
+//    private void handleTableView() {
+//        FileChooser fileChooser = new FileChooser();
+//        fileChooser.setTitle("Open Resource File");
+//        fileChooser.getExtensionFilters().addAll(
+//                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+//                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+//                new FileChooser.ExtensionFilter("All Files", "*.*"));
+//        File selectedFile = fileChooser.showOpenDialog(null);
+//
+//        if (selectedFile != null) {
+//            Path filePath = selectedFile.toPath();
+//            try {
+//                ConcurrentHashMap<Integer, Student> register = new ConcurrentHashMap<>();
+//
+//                BufferedReader br = new BufferedReader(new FileReader(selectedFile));
+//                String line;
+//                while ((line = br.readLine()) != null) {
+//                    String[] values = line.split(",");
+//                    int id = Integer.parseInt(values[0]);
+//                    String name = values[1];
+//                    String course = values[2];
+//                    String module = values[3];
+//                    int marks = Integer.parseInt(values[4]);
+//                    Student student = new Student(id, name, course, module, marks);
+//                    register.put(id, student);
+//                }
+//
+//                // Create the table columns and set the cell value factories
+//                TableColumn<Student, String> idColumn = new TableColumn<>("ID");
+//                idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+//
+//                TableColumn<Student, String> nameColumn = new TableColumn<>("Name");
+//                nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+//
+//                TableColumn<Student, String> courseColumn = new TableColumn<>("Course");
+//                courseColumn.setCellValueFactory(new PropertyValueFactory<>("course"));
+//
+//                TableColumn<Student, String> moduleColumn = new TableColumn<>("Module");
+//                moduleColumn.setCellValueFactory(new PropertyValueFactory<>("module"));
+//
+//                TableColumn<Student, Integer> marksColumn = new TableColumn<>("Marks");
+//                marksColumn.setCellValueFactory(new PropertyValueFactory<>("marks"));
+//
+//                // Add the columns to the table view
+//                tblView.getColumns().add(idColumn);
+//                tblView.getColumns().add(nameColumn);
+//                tblView.getColumns().add(courseColumn);
+//                tblView.getColumns().add(moduleColumn);
+//                tblView.getColumns().add(marksColumn);
+//
+//                // Create an observable list of students from the loaded register
+//                ObservableList<Student> students = FXCollections.observableArrayList(register.values());
+//                // Set the observable list as the items of the table view
+//                tblView.setItems(students);
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 }

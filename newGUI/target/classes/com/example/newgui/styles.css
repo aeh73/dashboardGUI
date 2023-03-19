@@ -39,6 +39,7 @@
     -fx-transition-duration: 0.5s;
 
 }
+
 .icon-red{
 -fx-background-color: #a6e3ab;
 }
@@ -47,6 +48,7 @@
 -fx-effect: dropshadow(gaussian, red, 5, 0, 0, 0);
     -fx-transition-duration: 0.5s;
 }
+
 .inputFields{
 -fx-border-radius: 5;
 }

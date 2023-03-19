@@ -53,7 +53,9 @@ public class StudentRegisterFileHandler {
                         student.getModule(), student.getMarks()));
 
         // Pass StandardOpenOption.APPEND to append to the file instead of overwriting it
-        Files.write(filePath, newLines.toList(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        //Files.write(filePath, newLines.toList(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        // Pass StandardOpenOption.TRUNCATE_EXISTING to overwrite to the file instead of appending
+        Files.write(filePath, newLines.toList(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 //    public static void save(ConcurrentHashMap<Integer, Student> register) throws IOException {
 //

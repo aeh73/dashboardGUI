@@ -6,6 +6,8 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -15,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="1250.0" styleClass="gradient-background" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.newgui.HelloController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1100.0" prefWidth="1280.0" styleClass="gradient-background" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.newgui.HelloController">
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="91.0" prefWidth="1250.0" spacing="25.0" BorderPane.alignment="CENTER">
             <children>
@@ -42,7 +44,7 @@
         </HBox>
     </top>
     <left>
-        <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="614.0" prefWidth="335.0" styleClass="input-container" stylesheets="@styles.css" BorderPane.alignment="TOP_LEFT">
+        <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="685.0" prefWidth="335.0" styleClass="input-container" stylesheets="@styles.css" BorderPane.alignment="TOP_CENTER">
             <BorderPane.margin>
                 <Insets bottom="10.0" left="50.0" right="10.0" top="10.0" />
             </BorderPane.margin>
@@ -56,7 +58,7 @@
                         </ImageView>
                     </children>
                 </HBox>
-                <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="7.0" prefWidth="277.0" styleClass="line-color-container" stylesheets="@styles.css">
+                <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="2.0" prefWidth="277.0" styleClass="line-color-container" stylesheets="@styles.css">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </VBox.margin>
@@ -132,7 +134,7 @@
                         </HBox>
                     </children>
                 </VBox>
-            <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="7.0" prefWidth="277.0" styleClass="line-color-container" stylesheets="@styles.css">
+            <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="2.0" prefWidth="277.0" styleClass="line-color-container" stylesheets="@styles.css">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -175,7 +177,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="30.0">
+                  <HBox alignment="CENTER" prefHeight="146.0" prefWidth="309.0" spacing="30.0">
                      <children>
                         <Button mnemonicParsing="false" styleClass="icon" textFill="#a6e3ab">
                            <graphic>
@@ -209,6 +211,28 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </HBox>
+                  <HBox alignment="CENTER" prefHeight="146.0" prefWidth="309.0" spacing="30.0">
+                     <children>
+                        <Button mnemonicParsing="false" styleClass="icon" textFill="#a6e3ab">
+                           <graphic>
+                              <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@icons-slide-up.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="icon-red" textFill="#a6e3ab">
+                           <graphic>
+                              <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" styleClass="icon-red">
+                                 <image>
+                                    <Image url="@icons-slide-down.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                     </children>
+                  </HBox>
                </children>
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -218,7 +242,7 @@
         </VBox>
     </left>
    <center>
-      <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="615.0" prefWidth="815.0" styleClass="output-container" stylesheets="@styles.css" BorderPane.alignment="TOP_LEFT">
+      <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="685.0" prefWidth="815.0" styleClass="output-container" stylesheets="@styles.css" BorderPane.alignment="TOP_CENTER">
          <BorderPane.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="10.0" />
          </BorderPane.margin>
@@ -278,8 +302,78 @@
                   </Button>
                </children>
             </HBox>
-            <ListView fx:id="listView" layoutX="24.0" layoutY="93.0" prefHeight="500.0" prefWidth="766.0" />
+            <ListView fx:id="listView" layoutX="24.0" layoutY="93.0" prefHeight="566.0" prefWidth="766.0" />
          </children>
       </Pane>
    </center>
+   <bottom>
+      <Pane prefHeight="400.0" prefWidth="600.0" styleClass="output-container">
+         <children>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="655.0" spacing="50.0">
+               <children>
+                  <Button mnemonicParsing="false" styleClass="icon" textFill="#a6e3ab">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" styleClass="icon">
+                           <image>
+                              <Image url="@icons-select-all.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="CLOSED_HAND" />
+                           </cursor>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#handleTableView" styleClass="icon" textFill="#a6e3ab">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" onMousePressed="#handleFileOpen" pickOnBounds="true" preserveRatio="true" styleClass="icon">
+                           <image>
+                              <Image url="@icons-add-file.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="CLOSED_HAND" />
+                           </cursor>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" styleClass="icon">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons-export-csv.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" styleClass="icon-red">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" styleClass="icon-red">
+                           <image>
+                              <Image url="@icons-delete-view.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" styleClass="icon">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons-ranking.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
+            </HBox>
+            <TableView fx:id="tblView" layoutX="23.0" layoutY="100.0" prefHeight="259.0" prefWidth="1213.0">
+              <columns>
+                <TableColumn prefWidth="75.0" text="ID" />
+                <TableColumn prefWidth="350.0" text="Name" />
+                  <TableColumn prefWidth="250.0" text="Course" />
+                  <TableColumn prefWidth="250.0" text="Module" />
+                  <TableColumn prefWidth="75.0" text="Marks" />
+              </columns>
+            </TableView>
+         </children>
+      </Pane>
+   </bottom>
 </BorderPane>
