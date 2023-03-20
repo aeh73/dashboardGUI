@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.SocketOption;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -39,7 +40,7 @@ public class HelloController implements Initializable {
     @FXML
     private ListView<String> listView;
     @FXML
-    private TableView<String> tblView;
+    private TableView<Student> tblView;
     @FXML
     private TextField idField, nameField, courseField, moduleField, marksField;
     @FXML
@@ -290,65 +291,53 @@ public class HelloController implements Initializable {
         }
 
     }
-//    @FXML
-//    private void handleTableView() {
-//        FileChooser fileChooser = new FileChooser();
-//        fileChooser.setTitle("Open Resource File");
-//        fileChooser.getExtensionFilters().addAll(
-//                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
-//                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
-//                new FileChooser.ExtensionFilter("All Files", "*.*"));
-//        File selectedFile = fileChooser.showOpenDialog(null);
-//
-//        if (selectedFile != null) {
-//            Path filePath = selectedFile.toPath();
-//            try {
-//                ConcurrentHashMap<Integer, Student> register = new ConcurrentHashMap<>();
-//
-//                BufferedReader br = new BufferedReader(new FileReader(selectedFile));
-//                String line;
-//                while ((line = br.readLine()) != null) {
-//                    String[] values = line.split(",");
-//                    int id = Integer.parseInt(values[0]);
-//                    String name = values[1];
-//                    String course = values[2];
-//                    String module = values[3];
-//                    int marks = Integer.parseInt(values[4]);
-//                    Student student = new Student(id, name, course, module, marks);
-//                    register.put(id, student);
-//                }
-//
-//                // Create the table columns and set the cell value factories
-//                TableColumn<Student, String> idColumn = new TableColumn<>("ID");
-//                idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-//
-//                TableColumn<Student, String> nameColumn = new TableColumn<>("Name");
-//                nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-//
-//                TableColumn<Student, String> courseColumn = new TableColumn<>("Course");
-//                courseColumn.setCellValueFactory(new PropertyValueFactory<>("course"));
-//
-//                TableColumn<Student, String> moduleColumn = new TableColumn<>("Module");
-//                moduleColumn.setCellValueFactory(new PropertyValueFactory<>("module"));
-//
-//                TableColumn<Student, Integer> marksColumn = new TableColumn<>("Marks");
-//                marksColumn.setCellValueFactory(new PropertyValueFactory<>("marks"));
-//
-//                // Add the columns to the table view
-//                tblView.getColumns().add(idColumn);
-//                tblView.getColumns().add(nameColumn);
-//                tblView.getColumns().add(courseColumn);
-//                tblView.getColumns().add(moduleColumn);
-//                tblView.getColumns().add(marksColumn);
-//
-//                // Create an observable list of students from the loaded register
-//                ObservableList<Student> students = FXCollections.observableArrayList(register.values());
-//                // Set the observable list as the items of the table view
-//                tblView.setItems(students);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+    @FXML
+    private void handleTableView() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+        File selectedFile = fileChooser.showOpenDialog(null);
+
+        if (selectedFile != null) {
+            Path filePath = selectedFile.toPath();
+            try {
+                List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+
+                // Create the table columns
+                TableColumn<Student, String> idColumn = new TableColumn<>("ID");
+                idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+                TableColumn<Student, String> nameColumn = new TableColumn<>("Name");
+                nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+                TableColumn<Student, String> courseColumn = new TableColumn<>("Course");
+                courseColumn.setCellValueFactory(new PropertyValueFactory<>("course"));
+
+                TableColumn<Student, String> moduleColumn = new TableColumn<>("Module");
+                moduleColumn.setCellValueFactory(new PropertyValueFactory<>("module"));
+
+                TableColumn<Student, String> marksColumn = new TableColumn<>("Marks");
+                marksColumn.setCellValueFactory(new PropertyValueFactory<>("marks"));
+
+                // Add the columns to the table view
+                tblView.getColumns().setAll(idColumn, nameColumn, courseColumn, moduleColumn, marksColumn);
+
+                // Create an observable list of students from the loaded lines
+                ObservableList<Student> students = FXCollections.observableArrayList();
+                for (String line : lines) {
+                    String[] values = line.split(",");
+                    Student student = new Student(Integer.parseInt(values[0]), values[1], values[2], values[3], Integer.parseInt(values[4]));
+                    students.add(student);
+                }
+
+                // Set the observable list as the items of the table view
+                tblView.setItems(students);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
